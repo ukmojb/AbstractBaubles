@@ -1,0 +1,16 @@
+[
+{
+  "modid": "abstractbaubles",
+  "name": "abstractbaubles",
+  "description": "111",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["wdcftgg"],
+  "credits": "Authors of this project",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

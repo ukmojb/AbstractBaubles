@@ -1,0 +1,12 @@
+{
+  "tungsten_alloy_rod":
+  {
+    "category": "record",
+    "sounds": [
+      {
+        "name" : "abstractbaubles:tungsten_alloy_rod",
+        "stream" : true
+      }
+    ]
+  }
+}
