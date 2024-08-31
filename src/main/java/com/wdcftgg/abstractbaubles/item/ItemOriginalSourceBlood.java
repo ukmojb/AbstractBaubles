@@ -2,15 +2,16 @@ package com.wdcftgg.abstractbaubles.item;
 
 import baubles.api.BaubleType;
 import baubles.api.BaublesApi;
-import com.wdcftgg.abstractbaubles.Tools;
 import com.wdcftgg.abstractbaubles.config.Config;
 import com.wdcftgg.abstractbaubles.network.MessageOriginalSourceBlood;
 import com.wdcftgg.abstractbaubles.network.PacketHandler;
+import com.wdcftgg.abstractbaubles.util.ABDamageSource;
+import com.wdcftgg.abstractbaubles.util.Tools;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,6 +29,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -35,16 +39,19 @@ import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Mod.EventBusSubscriber
 public class ItemOriginalSourceBlood extends BaseBaubleItem {
+
+    public Map<ItemStack, Integer> itemStackIntegerMap = null;
 
     public final UUID uuid = UUID.fromString("A3CA2EF6-AFFB-4523-B00F-E10F01C682E5");
     public final UUID uuid0 = UUID.fromString("4859B70D-50C0-5931-B2C0-6764DA16B3E7");
@@ -81,9 +88,11 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
         list.add("");
         if (GuiScreen.isAltKeyDown()) {
             list.add(I18n.format("abstractbaubles.original_source_blood.tooltip.9"));
-            for (int i = 0; i < getBloodFoodMap().size(); i++) {
-                List<ItemStack> itemStacks = new ArrayList<>(getBloodFoodMap().keySet());
-                List<Integer> integers = new ArrayList<>(getBloodFoodMap().values());
+
+            if (itemStackIntegerMap == null) itemStackIntegerMap = getBloodFoodMap();
+            for (int i = 0; i < itemStackIntegerMap.size(); i++) {
+                List<ItemStack> itemStacks = new ArrayList<>(itemStackIntegerMap.keySet());
+                List<Integer> integers = new ArrayList<>(itemStackIntegerMap.values());
                 ItemStack itemStack = itemStacks.get(i);
                 int foodlevel = integers.get(i);
                 list.add(itemStack.getDisplayName() + "--" + foodlevel);
@@ -117,7 +126,7 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
                 }
 
                 if (player.getFoodStats().getSaturationLevel() <= 0 && player.getFoodStats().getFoodLevel() <= 0) {
-                    player.setDead();
+                    player.attackEntityFrom(ABDamageSource.BloodSource, 114514F);
                 } else {
                     float sat = player.getFoodStats().getSaturationLevel();
                     int food = player.getFoodStats().getFoodLevel();
@@ -137,7 +146,6 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
                         int cool = itemstack.getTagCompound().getInteger("blood_totem_of_undying");
                         itemstack.getTagCompound().setInteger("blood_totem_of_undying", cool - 1);
                     }
-                    BaublesApi.getBaublesHandler(player).setStackInSlot(BaublesApi.isBaubleEquipped(player, ABItems.OriginalSourceBlood), itemstack);
                 } else {
                     NBTTagCompound nbtTagCompound = new NBTTagCompound();
                     nbtTagCompound.setInteger("blood_totem_of_undying", 0);
@@ -146,6 +154,12 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
                     }
                     itemstack.setTagCompound(nbtTagCompound);
                 }
+
+            }
+        } else {
+            if (entityLivingBase instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) entityLivingBase;
+                player.getEntityData().setBoolean("eat_blood", true);
             }
         }
 
@@ -161,6 +175,8 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
             AttributeModifier armor = new AttributeModifier(uuid0, this.registryKey, 8, 0);
             player.getAttributeMap().getAttributeInstanceByName("generic.maxHealth").applyModifier(maxHealth);
             player.getAttributeMap().getAttributeInstanceByName("generic.armor").applyModifier(armor);
+        } else {
+            player.getEntityData().setBoolean("eat_blood", true);
         }
     }
 
@@ -173,6 +189,8 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
             player.getAttributeMap().getAttributeInstanceByName("generic.maxHealth").removeModifier(maxHealth);
             player.getAttributeMap().getAttributeInstanceByName("generic.armor").removeModifier(armor);
             player.attackEntityFrom(DamageSource.GENERIC, 0.01F);
+        } else {
+            player.getEntityData().setBoolean("eat_blood", false);
         }
     }
 
@@ -215,9 +233,11 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
 
                         Map<ItemStack, Integer> foods = getBloodFoodMap();
                         ItemStack eatItem = new ItemStack(event.getItem().getItem(), 1, event.getItem().getMetadata());
-
-                        if (foods.get(eatItem) != null) {
-                            player.getFoodStats().addStats(foods.get(eatItem), 0);
+                        if (Config.foodInMap(eatItem, foods)) {
+                            player.getFoodStats().addStats(Config.foodLevelInMap(eatItem, foods), 0);
+                        } else {
+                            Random random = new Random();
+                            player.attackEntityFrom(ABDamageSource.EatNoBloodSource, random.nextInt(5));
                         }
 
                         Random random = new Random();
@@ -229,6 +249,7 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
             }
         }
     }
+
     @SubscribeEvent
     public void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         if (!event.getEntityLiving().world.isRemote) {
@@ -236,34 +257,21 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
                 EntityPlayer player = (EntityPlayer) event.getEntityLiving();
                 World world = player.world;
                 if (Tools.playerEquippedBauble(player, ABItems.OriginalSourceBlood)){
-                    if (event.getItemStack().getItem() instanceof ItemFood) {
+                    if (!(event.getItemStack().getItem() instanceof ItemFood)) {
 
                         Map<ItemStack, Integer> foods = getBloodFoodMap();
                         ItemStack eatItem = new ItemStack(event.getItemStack().getItem(), 1, event.getItemStack().getMetadata());
 
-                        if (foods.get(eatItem) != null) {
-                            player.getFoodStats().addStats(foods.get(eatItem), 0);
+                        if (Config.foodInMap(eatItem, foods)) {
+                            System.out.println("adwdwac");
+                            player.getFoodStats().addStats(Config.foodLevelInMap(eatItem, foods), 0);
+                            event.getItemStack().shrink(1);
+                            PacketHandler.INSTANCE.sendTo(new MessageOriginalSourceBlood(eatItem, 1), (EntityPlayerMP) player);
                         }
 
                         Random random = new Random();
                         if (random.nextFloat() <= 0.4F) {
                             player.addPotionEffect(new PotionEffect(Potion.getPotionById(17), random.nextInt(15 * 20) + 5 * 20, random.nextInt(3)));
-                        }
-                    }
-                }
-            }
-        } else {
-            if (event.getEntityLiving() instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-                World world = player.world;
-                if (Tools.playerEquippedBauble(player, ABItems.OriginalSourceBlood)){
-                    if (event.getItemStack().getItem() instanceof ItemFood) {
-
-                        Map<ItemStack, Integer> foods = getBloodFoodMap();
-                        ItemStack eatItem = new ItemStack(event.getItemStack().getItem(), 1, event.getItemStack().getMetadata());
-
-                        if (foods.get(eatItem) != null) {
-                            world.playSound(player.posX, player.posY, player.posZ, SoundEvents.ENTITY_GENERIC_EAT, player.getSoundCategory(), 1.0F, 1.0F, false);
                         }
                     }
                 }
@@ -292,18 +300,18 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
             if (entityLiving instanceof EntityPlayer) {
                 EntityPlayer player = (EntityPlayer) entityLiving;
                 if (Tools.playerEquippedBauble(player, ABItems.OriginalSourceBlood)) {
-                    player.setHealth((float) (player.getHealth() + (event.getAmount() * 0.5)));
-                }
-            }
-            if (target instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) target;
-                if (Tools.playerEquippedBauble(player, ABItems.OriginalSourceBlood)) {
                     if (player.world.canSeeSky(player.getPosition())) {
                         event.setAmount((float) (event.getAmount() * 1.8));
                     }
                     if (event.getSource().damageType.equals("fall")) {
                         event.setAmount((float) (event.getAmount() * 0.6));
                     }
+                }
+            }
+            if (target instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) target;
+                if (Tools.playerEquippedBauble(player, ABItems.OriginalSourceBlood)) {
+                    player.setHealth((float) (player.getHealth() + (event.getAmount() * 0.5)));
                 }
             }
         }
@@ -335,7 +343,7 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
                                 player.addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 900, 1));
                                 player.addPotionEffect(new PotionEffect(MobEffects.ABSORPTION, 100, 1));
 
-                                PacketHandler.INSTANCE.sendTo(new MessageOriginalSourceBlood(totemOrBoold), (EntityPlayerMP) player);
+                                PacketHandler.INSTANCE.sendTo(new MessageOriginalSourceBlood(totemOrBoold, 0), (EntityPlayerMP) player);
                                 event.setCanceled(true);
                             }
                         }
@@ -345,18 +353,37 @@ public class ItemOriginalSourceBlood extends BaseBaubleItem {
         }
     }
 
-    private Map<ItemStack, Integer> getBloodFoodMap() {
+
+    public static Map<ItemStack, Integer> getBloodFoodMap() {
         Map<ItemStack, Integer> map = new HashMap<>();
 
         for (String str : Config.BloodFoodList) {
             String[] strs = str.split(" -> ");
             String[] strs0 = strs[0].split(";");
-            ItemStack itemStack = new ItemStack(Item.getByNameOrId(strs0[0]), 1, Integer.valueOf(strs0[1]));
+            ItemStack itemStack = new ItemStack(getItemByText(strs0[0]), 1, Integer.parseInt(strs0[1]));
             map.put(itemStack, Integer.valueOf(strs[1]));
         }
 
         return map;
     }
 
+    private static Item getItemByText(String id)
+    {
+        ResourceLocation resourcelocation = new ResourceLocation(id);
+        Item item = Item.REGISTRY.getObject(resourcelocation);
+
+        if (item == null)
+        {
+            FMLLog.log.error(id + "was no found!!! we need a true item.");
+
+//            Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.RED + id + "was no found!!! we need a true item."));
+
+        }
+        else
+        {
+            return item;
+        }
+        return Items.AIR;
+    }
 
 }

@@ -1,0 +1,16 @@
+{
+  "package": "com.wdcftgg.abstractbaubles.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.abstractbaubles.refmap.json",
+  "mixins": [
+    "MixinEventHandlerEntity",
+    "MixinHungerRenderer"
+  ],
+  "server": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

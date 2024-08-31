@@ -1,5 +1,6 @@
 package com.wdcftgg.abstractbaubles.item;
 
+import com.wdcftgg.abstractbaubles.item.mods.ItemThirdManaEye;
 import net.minecraft.item.Item;
 
 import java.util.ArrayList;
@@ -19,4 +20,11 @@ public class ABItems {
     public static final Item MagicQuiver = new ItemMagicQuiver();
     public static final Item RottedSachet = new ItemRottedSachet();
     public static final Item VampireTooth = new ItemVampireTooth();
+    public static final Item MagicFlower = new ItemMagicFlower();
+    public static final Item GiantHand = new ItemGiantHand();
+    public static final Item MemberShipCard = new ItemMemberShipCard();
+    public static final Item SharkToothNecklace = new ItemSharkToothNecklace();
+    public static final Item PenNib = new ItemPenNib();
+    public static final Item LizardTail = new ItemLizardTail();
+    public static final Item ThirdManaEye = new ItemThirdManaEye();
 }

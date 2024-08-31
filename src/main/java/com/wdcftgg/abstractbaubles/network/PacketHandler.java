@@ -24,6 +24,7 @@ public class PacketHandler {
 //        INSTANCE.registerMessage(MessageTimeBack.class, MessageTimeBack.class, num++, Side.CLIENT);
 //        INSTANCE.registerMessage(MessageTimeAltarCore.class, MessageTimeAltarCore.class, num++, Side.CLIENT);
         INSTANCE.registerMessage(MessageOriginalSourceBlood.class, MessageOriginalSourceBlood.class, num++, Side.CLIENT);
+        INSTANCE.registerMessage(MessageEmbraceOfBlood.class, MessageEmbraceOfBlood.class, num++, Side.CLIENT);
         INSTANCE.registerMessage(MessageTungstenAlloyAodGet.class, MessageTungstenAlloyAodGet.class, num++, Side.CLIENT);
 //
 //

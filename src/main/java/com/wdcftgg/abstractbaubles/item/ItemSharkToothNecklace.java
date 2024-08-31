@@ -17,10 +17,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
-public class ItemVampireTooth extends BaseBaubleItem {
+public class ItemSharkToothNecklace extends BaseBaubleItem {
 
-    public ItemVampireTooth() {
-        super("vampire_tooth", BaubleType.BODY);
+    public ItemSharkToothNecklace() {
+        super("shark_tooth_necklace", BaubleType.CHARM);
     }
 
     public EnumRarity getRarity(ItemStack par1ItemStack) {
@@ -30,7 +30,7 @@ public class ItemVampireTooth extends BaseBaubleItem {
     @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack itemStack, World worldIn, List<String> list, ITooltipFlag flagIn) {
-        list.add(I18n.format("abstractbaubles.vampire_tooth.tooltip"));
+        list.add(I18n.format("abstractbaubles.shark_tooth_necklace.tooltip"));
     }
 
     @SubscribeEvent
@@ -40,10 +40,16 @@ public class ItemVampireTooth extends BaseBaubleItem {
         //攻击者
         Entity target = event.getSource().getTrueSource();
         if (!entityLiving.world.isRemote) {
-            if (entityLiving instanceof EntityPlayer) {
+            if (entityLiving instanceof EntityPlayer && target instanceof EntityLivingBase) {
                 EntityPlayer player = (EntityPlayer) entityLiving;
-                if (Tools.playerEquippedBauble(player, ABItems.VampireTooth)) {
-                    player.heal(event.getAmount() * 0.3F);
+                EntityLivingBase entityLivingBase = (EntityLivingBase) target;
+                if (Tools.playerEquippedBauble(player, ABItems.SharkToothNecklace)) {
+                    int armor = entityLivingBase.arrowHitTimer;
+                    float damage = event.getAmount();
+                    float origin_damage = (float) (armor + Math.sqrt(0.0004F * armor * armor - 0.08F + 0.08F * damage));
+                    float newreduction = (1.0F - 0.04F * (Math.max(0, (armor - 6.0F)) - origin_damage * 0.5F));
+                    float newdamage = newreduction * origin_damage;
+                    event.setAmount(newdamage);
                 }
             }
         }

@@ -1,44 +1,51 @@
 package com.wdcftgg.abstractbaubles.item;
 
 import baubles.api.BaubleType;
-import com.wdcftgg.abstractbaubles.AbstractBaubles;
-import com.wdcftgg.abstractbaubles.Tools;
+import com.wdcftgg.abstractbaubles.mixins.MixinHungerRenderer;
+import com.wdcftgg.abstractbaubles.network.MessageEmbraceOfBlood;
+import com.wdcftgg.abstractbaubles.network.MessageOriginalSourceBlood;
+import com.wdcftgg.abstractbaubles.network.PacketHandler;
+import com.wdcftgg.abstractbaubles.util.ABDamageSource;
+import com.wdcftgg.abstractbaubles.util.Tools;
 import com.wdcftgg.abstractbaubles.config.Config;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.*;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import tfar.classicbar.config.ModConfig;
 
+import javax.annotation.Nonnull;
 import java.util.*;
+
 
 @Mod.EventBusSubscriber
 public class ItemEmbraceOfBlood extends BaseBaubleItem {
 
+    public Map<ItemStack, Integer> itemStackIntegerMap = null;
     public final UUID uuid = UUID.fromString("A3CA2EF6-AFFB-4523-B00F-E10F01C682E5");
     public final UUID uuid0 = UUID.fromString("4859B70D-50C0-5931-B2C0-6764DA16B3E7");
 
@@ -72,9 +79,11 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
         list.add("");
         if (GuiScreen.isAltKeyDown()) {
             list.add(I18n.format("abstractbaubles.embrace_of_blood.tooltip.7"));
-            for (int i = 0; i < getBloodFoodMap().size(); i++) {
-                List<ItemStack> itemStacks = new ArrayList<>(getBloodFoodMap().keySet());
-                List<Integer> integers = new ArrayList<>(getBloodFoodMap().values());
+
+            if (itemStackIntegerMap == null) itemStackIntegerMap = getBloodFoodMap();
+            for (int i = 0; i < itemStackIntegerMap.size(); i++) {
+                List<ItemStack> itemStacks = new ArrayList<>(itemStackIntegerMap.keySet());
+                List<Integer> integers = new ArrayList<>(itemStackIntegerMap.values());
                 ItemStack itemStack = itemStacks.get(i);
                 int foodlevel = integers.get(i);
                 list.add(itemStack.getDisplayName() + "--" + foodlevel);
@@ -107,7 +116,7 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
                 }
 
                 if (player.getFoodStats().getSaturationLevel() <= 0 && player.getFoodStats().getFoodLevel() <= 0) {
-                    player.setDead();
+                    player.attackEntityFrom(ABDamageSource.BloodSource, 114514F);
                 } else {
                     float sat = player.getFoodStats().getSaturationLevel();
                     int food = player.getFoodStats().getFoodLevel();
@@ -121,9 +130,15 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
                         }
                     }
                 }
+
+
+            }
+        } else {
+            if (entityLivingBase instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) entityLivingBase;
+                player.getEntityData().setBoolean("eat_blood", true);
             }
         }
-
     }
 
 
@@ -136,6 +151,8 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
             AttributeModifier armor = new AttributeModifier(uuid0, this.registryKey, 4, 0);
             player.getAttributeMap().getAttributeInstanceByName("generic.maxHealth").applyModifier(maxHealth);
             player.getAttributeMap().getAttributeInstanceByName("generic.armor").applyModifier(armor);
+        } else {
+            player.getEntityData().setBoolean("eat_blood", true);
         }
     }
 
@@ -148,6 +165,8 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
             player.getAttributeMap().getAttributeInstanceByName("generic.maxHealth").removeModifier(maxHealth);
             player.getAttributeMap().getAttributeInstanceByName("generic.armor").removeModifier(armor);
             player.attackEntityFrom(DamageSource.GENERIC, 0.01F);
+        } else {
+            player.getEntityData().setBoolean("eat_blood", false);
         }
     }
 
@@ -181,9 +200,11 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
 
                         Map<ItemStack, Integer> foods = getBloodFoodMap();
                         ItemStack eatItem = new ItemStack(event.getItem().getItem(), 1, event.getItem().getMetadata());
-
-                        if (foods.get(eatItem) != null) {
-                            player.getFoodStats().addStats(foods.get(eatItem), 0);
+                        if (Config.foodInMap(eatItem, foods)) {
+                            player.getFoodStats().addStats(Config.foodLevelInMap(eatItem, foods), 0);
+                        } else {
+                            Random random = new Random();
+                            player.attackEntityFrom(ABDamageSource.EatNoBloodSource, random.nextInt(5));
                         }
 
                         Random random = new Random();
@@ -195,6 +216,7 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
             }
         }
     }
+
     @SubscribeEvent
     public void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         if (!event.getEntityLiving().world.isRemote) {
@@ -202,13 +224,16 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
                 EntityPlayer player = (EntityPlayer) event.getEntityLiving();
                 World world = player.world;
                 if (Tools.playerEquippedBauble(player, ABItems.EmbraceOfBlood)){
-                    if (event.getItemStack().getItem() instanceof ItemFood) {
+                    if (!(event.getItemStack().getItem() instanceof ItemFood)) {
 
                         Map<ItemStack, Integer> foods = getBloodFoodMap();
                         ItemStack eatItem = new ItemStack(event.getItemStack().getItem(), 1, event.getItemStack().getMetadata());
 
-                        if (foods.get(eatItem) != null) {
-                            player.getFoodStats().addStats(foods.get(eatItem), 0);
+                        if (Config.foodInMap(eatItem, foods)) {
+                            player.getFoodStats().addStats(Config.foodLevelInMap(eatItem, foods), 0);
+                            event.getItemStack().shrink(1);
+                            player.getCooldownTracker().setCooldown(eatItem.getItem(), 5);
+                            PacketHandler.INSTANCE.sendTo(new MessageEmbraceOfBlood(eatItem), (EntityPlayerMP) player);
                         }
 
                         Random random = new Random();
@@ -223,12 +248,12 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
                 EntityPlayer player = (EntityPlayer) event.getEntityLiving();
                 World world = player.world;
                 if (Tools.playerEquippedBauble(player, ABItems.EmbraceOfBlood)){
-                    if (event.getItemStack().getItem() instanceof ItemFood) {
+                    if (!(event.getItemStack().getItem() instanceof ItemFood)) {
 
                         Map<ItemStack, Integer> foods = getBloodFoodMap();
                         ItemStack eatItem = new ItemStack(event.getItemStack().getItem(), 1, event.getItemStack().getMetadata());
 
-                        if (foods.get(eatItem) != null) {
+                        if (Config.foodInMap(eatItem, foods)) {
                             world.playSound(player.posX, player.posY, player.posZ, SoundEvents.ENTITY_GENERIC_EAT, player.getSoundCategory(), 1.0F, 1.0F, false);
                         }
                     }
@@ -248,6 +273,7 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
             }
         }
     }
+
     @SubscribeEvent
     public void onLivingDamage(LivingDamageEvent event) {
         //被攻击者
@@ -255,14 +281,14 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
         //攻击者
         Entity target = event.getSource().getTrueSource();
         if (!entityLiving.world.isRemote) {
-            if (entityLiving instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) entityLiving;
+            if (target instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) target;
                 if (Tools.playerEquippedBauble(player, ABItems.EmbraceOfBlood)) {
                     player.setHealth((float) (player.getHealth() + (event.getAmount() * 0.3)));
                 }
             }
-            if (target instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) target;
+            if (entityLiving instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) entityLiving;
                 if (Tools.playerEquippedBauble(player, ABItems.EmbraceOfBlood)) {
                     if (player.world.canSeeSky(player.getPosition())) {
                         event.setAmount((float) (event.getAmount() * 1.5));
@@ -275,16 +301,37 @@ public class ItemEmbraceOfBlood extends BaseBaubleItem {
         }
     }
 
-    private Map<ItemStack, Integer> getBloodFoodMap() {
+    public static Map<ItemStack, Integer> getBloodFoodMap() {
         Map<ItemStack, Integer> map = new HashMap<>();
 
         for (String str : Config.BloodFoodList) {
             String[] strs = str.split(" -> ");
             String[] strs0 = strs[0].split(";");
-            ItemStack itemStack = new ItemStack(Item.getByNameOrId(strs0[0]), 1, Integer.valueOf(strs0[1]));
+            ItemStack itemStack = new ItemStack(getItemByText(strs0[0]), 1, Integer.parseInt(strs0[1]));
             map.put(itemStack, Integer.valueOf(strs[1]));
         }
 
         return map;
     }
+
+    private static Item getItemByText(String id)
+    {
+        ResourceLocation resourcelocation = new ResourceLocation(id);
+        Item item = Item.REGISTRY.getObject(resourcelocation);
+
+        if (item == null)
+        {
+            FMLLog.log.error(id + "was no found!!! we need a true item.");
+
+//            Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.RED + id + "was no found!!! we need a true item."));
+
+        }
+        else
+        {
+            return item;
+        }
+        return Items.AIR;
+    }
+
+
 }

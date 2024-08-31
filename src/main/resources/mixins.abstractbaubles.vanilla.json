@@ -1,0 +1,15 @@
+{
+  "package": "com.wdcftgg.abstractbaubles.mixins.vanilla",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.abstractbaubles.refmap.json",
+  "mixins": [
+    "MixinItemFood"
+  ],
+  "server": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

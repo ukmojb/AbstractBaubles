@@ -24,7 +24,7 @@ public class ClientProxy extends CommonProxy {
 
 	public void onInit(){
 		super.onInit();
-//		MinecraftForge.EVENT_BUS.register(new EventLossSpatialSense());
+		//		MinecraftForge.EVENT_BUS.register(new EventLossSpatialSense());
 	}
 
 
@@ -39,6 +39,11 @@ public class ClientProxy extends CommonProxy {
 
 	public void onPostInit() {
 		super.onPostInit();
+
+//		if (Loader.isModLoaded("classicbar")) {
+//			EventHandler.register(new BloodRenderer());
+////			EventHandler.setup();
+//		}
 
 	}
 

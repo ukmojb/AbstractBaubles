@@ -1,13 +1,12 @@
 package com.wdcftgg.abstractbaubles.item;
 
 import baubles.api.BaubleType;
-import com.wdcftgg.abstractbaubles.network.MessageTungstenAlloyAodGet;
-import com.wdcftgg.abstractbaubles.network.PacketHandler;
 import com.wdcftgg.abstractbaubles.util.Tools;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -18,10 +17,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
-public class ItemTungstenAlloyAod extends BaseBaubleItem {
+public class ItemGiantHand extends BaseBaubleItem {
 
-    public ItemTungstenAlloyAod() {
-        super("tungsten_alloy_rod", BaubleType.TRINKET);
+    public ItemGiantHand() {
+        super("giant_hand", BaubleType.TRINKET);
     }
 
     public EnumRarity getRarity(ItemStack par1ItemStack) {
@@ -32,17 +31,22 @@ public class ItemTungstenAlloyAod extends BaseBaubleItem {
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack itemStack, World worldIn, List<String> list, ITooltipFlag flagIn)
     {
-        list.add(I18n.format("abstractbaubles.tungsten_alloy_rod.tooltip"));
+        list.add(I18n.format("abstractbaubles.giant_hand.tooltip"));
     }
 
     @SubscribeEvent
-    public void onLivingAttack(LivingDamageEvent event) {
-        if (!event.getEntityLiving().world.isRemote) {
-            if (event.getEntityLiving() instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) event.getEntityLiving();
-                if (Tools.playerEquippedBauble(player, ABItems.TungstenAlloyAod)) {
-                    event.setAmount(event.getAmount() * 0.9F);
-                    PacketHandler.INSTANCE.sendTo(new MessageTungstenAlloyAodGet(), (EntityPlayerMP) player);
+    public void onLivingDamage(LivingDamageEvent event) {
+        //被攻击者
+        EntityLivingBase entityLiving = (EntityLivingBase) event.getEntityLiving();
+        //攻击者
+        Entity target = event.getSource().getTrueSource();
+        if (!entityLiving.world.isRemote) {
+            if (target instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) target;
+                if (Tools.playerEquippedBauble(player, ABItems.EmbraceOfBlood)) {
+                    if (entityLiving.getMaxHealth() >= 100) {
+                        event.setAmount(event.getAmount() * 1.25F);
+                    }
                 }
             }
         }

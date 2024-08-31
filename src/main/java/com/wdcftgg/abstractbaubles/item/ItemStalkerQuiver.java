@@ -1,8 +1,8 @@
 package com.wdcftgg.abstractbaubles.item;
 
 import baubles.api.BaubleType;
-import baubles.api.BaublesApi;
-import com.wdcftgg.abstractbaubles.Tools;
+import com.wdcftgg.abstractbaubles.util.Tools;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -10,14 +10,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -42,6 +38,14 @@ public class ItemStalkerQuiver extends BaseBaubleItem {
     public void addInformation(ItemStack itemStack, World worldIn, List<String> list, ITooltipFlag flagIn)
     {
         list.add(I18n.format("abstractbaubles.stalker_quiver.tooltip"));
+        list.add("");
+
+        if (GuiScreen.isShiftKeyDown()) {
+            list.add(I18n.format("abstractbaubles.stalker_quiver.tooltip.0"));
+            list.add(I18n.format("abstractbaubles.stalker_quiver.tooltip.1"));
+        } else {
+            list.add(I18n.format("abstractbaubles.abstractbaubles.shifttooltip"));
+        }
     }
 
     @SubscribeEvent
@@ -75,9 +79,9 @@ public class ItemStalkerQuiver extends BaseBaubleItem {
                 EntityPlayer player = (EntityPlayer) arrow.shootingEntity;
                 if (Tools.playerEquippedBauble(player, ABItems.StalkerQuiver)) {
                     arrow.setDamage(arrow.getDamage() * 1.15F);
-                    arrow.motionX *= 1.8;
-                    arrow.motionY *= 1.8;
-                    arrow.motionZ *= 1.8;
+                    arrow.motionX *= 1.6;
+                    arrow.motionY *= 1.6;
+                    arrow.motionZ *= 1.6;
                 }
             }
         }

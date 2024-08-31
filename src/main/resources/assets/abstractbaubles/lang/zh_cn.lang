@@ -21,7 +21,7 @@ item.abstractbaubles.pen_nib.name=钢笔尖
 item.abstractbaubles.lizard_tail.name=蜥蜴尾巴
 item.abstractbaubles.preserved_insect.name=昆虫标本
 item.abstractbaubles.small_shield.name=一尘不染的小盾牌
-item.abstractbaubles..name=
+item.abstractbaubles.magic_flower.name=魔法花
 item.abstractbaubles..name=
 item.abstractbaubles..name=
 
@@ -29,6 +29,9 @@ item.abstractbaubles..name=
 
 ##########################
 itemGroup.abstractbaublestab=抽象饰品
+
+##########################
+death.attack.blood_source=%s 因无血而死...
 
 
 #####
@@ -56,10 +59,12 @@ abstractbaubles.original_source_blood.tooltip.6=死亡时自动触发不死图�
 abstractbaubles.original_source_blood.tooltip.7=在阳光下会被燃烧（戴头盔避免）且受到伤害增加80%%
 abstractbaubles.original_source_blood.tooltip.8=饥饿值更换为渴血值，剩下50%%及以下时越低给予负面效果越强，若为零则直接死亡
 abstractbaubles.original_source_blood.tooltip.9=以下食物可提供渴血值:
+abstractbaubles.vampire_tooth.tooltip=某个吸血鬼死后遗留的部位，蕴含部分吸血鬼的能力，或许能作为重现血族力量的媒介…
 abstractbaubles.empty_heart.tooltip=减少50%%生命上限，增加60%%回复
 abstractbaubles.laurus.tooltip.0=可抵挡攻击次数为 %s 次
 abstractbaubles.laurus.tooltip.1=冷却剩 %s 秒
-abstractbaubles.laurus.tooltip.2=冷却剩不知道多少秒，反正佩戴后才会开始减少冷却！
+abstractbaubles.laurus.tooltip.2=冷却没了，开始浪吧~
+abstractbaubles.laurus.tooltip.3=冷却剩不知道多少秒，反正佩戴后才会开始减少冷却！
 abstractbaubles.mind_power_pearl.tooltip=吸收周围掉落物
 abstractbaubles.pummarola.tooltip.0=虽然叫做番茄，但似乎和正常的番茄没有一丁点关系…
 abstractbaubles.pummarola.tooltip.1=蕴含着大量生命力，能加速你的伤势恢复
@@ -70,5 +75,25 @@ abstractbaubles.stalker_quiver.tooltip=由魔法箭袋和腐香囊合成，结�
 abstractbaubles.magic_quiver.tooltip=又快又准！
 abstractbaubles.rotted_sachet.tooltip=好臭！离我远点！
 abstractbaubles.tungsten_alloy_rod.tooltip=非常非常重，但似乎很容易发出声音？
-abstractbaubles.vampire_tooth.tooltip=某个吸血鬼死后遗留的部位，蕴含部分吸血鬼的能力，或许能作为重现血族力量的媒介…
+abstractbaubles.magic_flower.tooltip=被认为早已绝种的一朵花，竟被完好的保存了下来
+abstractbaubles.giant_hand.tooltip=对生命值上限大于100的单位造成额外25%%伤害
+abstractbaubles.shark_tooth_necklace.tooltip=攻击固定无视6点护甲
+abstractbaubles.membership_card.tooltip.0=会员资格！能让那些臭奸商都为你打折！
+abstractbaubles.membership_card.tooltip.1=会员资格！奸商！交出绿宝石！
+abstractbaubles.membership_card.tooltip.2=拿着它痛击奸商！
+abstractbaubles.pen_nib.tooltip=拿着这支笔尖时，你几乎可以看见所有被笔尖前主人杀死过的人，真是血腥的历史...
+abstractbaubles.pen_nib.tooltip.0=强化攻击已就绪！
+abstractbaubles.pen_nib.tooltip.1=强化攻击还需攻击 %s 下才能激活！
+abstractbaubles.pen_nib.tooltip.2=每十下有一个强化攻击，造成双倍伤害
+abstractbaubles.lizard_tail.tooltip=在战斗中可以用来骗过敌人的假尾巴
+abstractbaubles.lizard_tail.tooltip.0=逃跑视角已记录！
+abstractbaubles.lizard_tail.tooltip.1=逃跑视角尚未记录！
+abstractbaubles.lizard_tail.tooltip.2=拿在手中蹲下右键来记录逃跑视角，否则逃跑的末影珍珠方向将为随机方向！
+abstractbaubles.third_mana_eye.tooltip=魔力工具消耗魔力减免20%%，增加魔法伤害
+abstractbaubles.magic_quiver.tooltip.0=箭的伤害提升10%%，初始飞行速度提升30%%，下坠略微减少
+abstractbaubles.rotted_sachet.tooltip.0=敌怪针对装备者索敌距离减少，不容易被怪物锁定
+abstractbaubles.rotted_sachet.tooltip.1=提升5%%伤害和5%%暴击率
+abstractbaubles.stalker_quiver.tooltip.0=箭的伤害提升15%%，初始飞行速度提升40%%，下坠略微减少
+abstractbaubles.stalker_quiver.tooltip.1=提升5%%伤害和5%%暴击率
+
 

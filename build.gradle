@@ -92,6 +92,10 @@ repositories {
             includeGroup 'curse.maven'
         }
     }
+    maven {
+        name = 'jared maven'
+        url = 'https://maven.blamejared.com'
+    }
     mavenLocal() // Must be last for caching to work
 }
 
@@ -105,6 +109,10 @@ dependencies {
 
     // Example of deobfuscating a dependency
     implementation rfg.deobf('curse.maven:Baubles-227083:2518667')
+    compileOnly rfg.deobf('curse.maven:RaidsBackport-977633:5626565')
+    implementation rfg.deobf("vazkii.botania:Botania:r1.10-364.4")
+    implementation rfg.deobf("curse.maven:ClassicBars-317642:2861996")
+
 
     if (project.use_mixins.toBoolean()) {
         // Change your mixin refmap name here:
